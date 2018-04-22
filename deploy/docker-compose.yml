@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  j2ee-demo:
+    image: "tomcat:alpine"
+    restart: always
+
+    volumes:
+      - ../../target/j2ee-demo:/usr/local/tomcat/webapps/j2ee-demo
+    ports:
+      - 8888:8080
