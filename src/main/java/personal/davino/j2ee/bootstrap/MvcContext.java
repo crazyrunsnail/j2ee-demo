@@ -33,17 +33,7 @@ import java.util.List;
 @EnableWebMvc
 public class MvcContext extends WebMvcConfigurerAdapter{
 
-    final ObjectMapper objectMapper;
 
-    final Marshaller marshaller;
-
-    final Unmarshaller unmarshaller;
-
-    public MvcContext(ObjectMapper objectMapper, Marshaller marshaller, Unmarshaller unmarshaller) {
-        this.objectMapper = objectMapper;
-        this.marshaller = marshaller;
-        this.unmarshaller = unmarshaller;
-    }
 
     /**
      * 配置JSP view Resolver
