@@ -1,22 +1,49 @@
 package personal.davino.j2ee.bootstrap;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.xml.MarshallingHttpMessageConverter;
+import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.Unmarshaller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
-import personal.davino.j2ee.controller.HelloController;
-import personal.davino.j2ee.service.GreetingService;
-import personal.davino.j2ee.service.impl.GreetingServiceImpl;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 @ComponentScan(basePackages = {"personal.davino.j2ee"},
         useDefaultFilters = false, includeFilters = {@ComponentScan.Filter(Controller.class)})
-public class MvcContext {
+@EnableWebMvc
+public class MvcContext extends WebMvcConfigurerAdapter{
+
+    final ObjectMapper objectMapper;
+
+    final Marshaller marshaller;
+
+    final Unmarshaller unmarshaller;
+
+    public MvcContext(ObjectMapper objectMapper, Marshaller marshaller, Unmarshaller unmarshaller) {
+        this.objectMapper = objectMapper;
+        this.marshaller = marshaller;
+        this.unmarshaller = unmarshaller;
+    }
 
     /**
      * 配置JSP view Resolver
@@ -44,5 +71,35 @@ public class MvcContext {
         return translator;
     }
 
+    /*@Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(new ByteArrayHttpMessageConverter());
+        converters.add(new StringHttpMessageConverter());
+        converters.add(new FormHttpMessageConverter());
+        converters.add(new SourceHttpMessageConverter<>());
+        MarshallingHttpMessageConverter xmlConverter = new MarshallingHttpMessageConverter();
+        xmlConverter.setSupportedMediaTypes(Arrays.asList( new MediaType("application", "xml"),
+                new MediaType("text", "xml")
+        ));
+        xmlConverter.setMarshaller(this.marshaller); xmlConverter.setUnmarshaller(this.unmarshaller); converters.add(xmlConverter);
+        converters.add(xmlConverter);
 
+        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
+        jsonConverter.setSupportedMediaTypes(Arrays.asList( new MediaType("application", "json"),
+                new MediaType("text", "json")
+        ));
+        jsonConverter.setObjectMapper(this.objectMapper);
+        converters.add(jsonConverter);
+    }*/
+
+
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer)
+    {
+        configurer.favorPathExtension(true).favorParameter(true)
+                .ignoreAcceptHeader(false) .useJaf(false)
+                .defaultContentType(MediaType.APPLICATION_JSON)
+                .mediaType("xml", MediaType.APPLICATION_XML)
+                .mediaType("json", MediaType.APPLICATION_JSON);
+    }
 }
