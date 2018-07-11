@@ -1,1 +1,3 @@
 personal.davino.j2ee.init.Initializer
+personal.davino.j2ee.init.AnotherInitializer
+personal.davino.j2ee.init.DynamicServletInitializer

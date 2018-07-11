@@ -10,9 +10,11 @@ public class Initializer implements ServletContainerInitializer {
 
     @Override
     public void onStartup(Set<Class<?>> set, ServletContext servletContext) throws ServletException {
+        System.out.println("Comming Initializer....");
         for (Class c: set) {
             System.out.println(c.getCanonicalName());
         }
+        System.out.println("Initializer init completed!");
     }
 
 }

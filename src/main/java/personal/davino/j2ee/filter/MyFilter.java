@@ -18,11 +18,12 @@ public class MyFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        logger.info("doFilter...");
+        long start = System.currentTimeMillis();
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         }finally {
-            logger.info("filter Chain finish!");
+            long spendTime = System.currentTimeMillis() - start;
+            logger.info("Spend Time: {} ms", spendTime);
         }
     }
 
