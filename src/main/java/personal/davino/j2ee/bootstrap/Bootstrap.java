@@ -17,7 +17,10 @@ public class Bootstrap implements WebApplicationInitializer{
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         logger.debug("Init Spring AnnotationConfigWebApplicationContext");
+
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.register(MvcContext.class);
+
         ServletRegistration.Dynamic springDispather =
                 servletContext.addServlet("springDispather", new DispatcherServlet(context));
         springDispather.setLoadOnStartup(1);
