@@ -1,4 +1,4 @@
-package personal.davino.j2ee.listener.session;
+package personal.davino.j2ee.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
