@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class SchedulingServiceImpl {
     private final static Logger logger = LoggerFactory.getLogger(SchedulingServiceImpl.class);
 
-    @Scheduled(fixedRate = 1_000L, initialDelay = 4000L)
+//    @Scheduled(fixedRate = 1_000L, initialDelay = 4000L)
     public void schedule() {
         logger.info("schedule begin...");
         try {

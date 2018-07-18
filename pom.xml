@@ -108,6 +108,13 @@
             <artifactId>hibernate-validator</artifactId>
             <version>6.0.7.Final</version>
         </dependency>
+
+        <!-- 如果需要使用则要加入@Inject-->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
     </dependencies>
 
     <build>

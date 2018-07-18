@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -19,6 +20,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
@@ -27,7 +29,8 @@ import java.util.concurrent.Executor;
  * 记得加入 @Configuration, 不然 {@code taskScheduler} 不能注入
  */
 @ComponentScan(basePackages = "personal.davino.j2ee",
-        excludeFilters = {@ComponentScan.Filter(Controller.class)})
+        excludeFilters = {@ComponentScan.Filter(Controller.class),
+                @ComponentScan.Filter(EnableWebMvc.class)})
 @EnableAsync(proxyTargetClass = true)
 @EnableScheduling
 @Configuration
