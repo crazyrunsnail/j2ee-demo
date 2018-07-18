@@ -2,6 +2,7 @@ package personal.davino.j2ee.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebListener;
@@ -17,6 +18,10 @@ public class CustomerServletContextListener implements ServletContextListener{
         logger.debug("CustomerServletContextListener....");
         ServletContext servletContext = sce.getServletContext();
         FilterRegistration.Dynamic filter = servletContext.addFilter("anotherFilter", new AnotherMyFilter());
+        filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.ASYNC, DispatcherType.REQUEST) ,
+                false, "/");
+        FilterRegistration.Dynamic characterEncodingFilter = servletContext.addFilter("characterEncodingFilter",
+                new CharacterEncodingFilter("UTF-8"));
         filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.ASYNC, DispatcherType.REQUEST) ,
                 false, "/");
     }
