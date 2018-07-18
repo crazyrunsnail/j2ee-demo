@@ -7,8 +7,8 @@
     <!-- 控制台日志输 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %-40.40logger{39} : %m%n</pattern>-->
             <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] -[%-5p] [%15.15t] %-40.40logger{39} : %m%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 

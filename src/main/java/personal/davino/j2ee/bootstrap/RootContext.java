@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -15,9 +17,15 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 
+/**
+ * 记得加入 @Configuration, 不然 {@code taskScheduler} 不能注入
+ */
 @ComponentScan(basePackages = "personal.davino.j2ee",
         excludeFilters = {@ComponentScan.Filter(Controller.class)})
 @EnableAsync(proxyTargetClass = true)
@@ -64,5 +72,43 @@ public class RootContext implements AsyncConfigurer, SchedulingConfigurer {
         TaskScheduler scheduler = this.taskScheduler();
         LOGGER.info("Configuring scheduled method executor {}.", scheduler);
         registrar.setTaskScheduler(scheduler);
+    }
+
+    /**
+     * 配置 MessageSource
+     * 在validate可能会用到
+     * @return
+     */
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setBasenames("classpath:i18n/titles", "classpath:i18n/messages", "classpath:i18n/errors",
+                "classpath:i18n/validation");
+        return messageSource;
+    }
+
+    /**
+     * 注册validator
+     * @return
+     */
+    @Bean
+    public LocalValidatorFactoryBean localValidatorFactoryBean() throws ClassNotFoundException {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setValidationMessageSource(messageSource());
+        validator.setProviderClass(Class.forName("org.hibernate.validator.HibernateValidator"));
+        return validator;
+    }
+
+    /**
+     * 注册方法校验
+     * @return
+     * @throws ClassNotFoundException
+     */
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() throws ClassNotFoundException {
+        MethodValidationPostProcessor methodValidationPostProcessor = new MethodValidationPostProcessor();
+        methodValidationPostProcessor.setValidator(localValidatorFactoryBean());
+        return methodValidationPostProcessor;
     }
 }

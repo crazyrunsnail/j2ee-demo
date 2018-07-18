@@ -1,9 +1,11 @@
 package personal.davino.j2ee.bootstrap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -15,25 +17,35 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 
 @ComponentScan(basePackages = {"personal.davino.j2ee"},
         useDefaultFilters = false, includeFilters = {@ComponentScan.Filter(Controller.class)})
 @EnableWebMvc
+@Configuration
 public class MvcContext extends WebMvcConfigurerAdapter{
 
-
+    @Inject
+    private SpringValidatorAdapter validator;
 
     /**
      * 配置JSP view Resolver
@@ -60,6 +72,8 @@ public class MvcContext extends WebMvcConfigurerAdapter{
         translator.setPrefix("default/");
         return translator;
     }
+
+
 
     /*@Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -92,4 +106,24 @@ public class MvcContext extends WebMvcConfigurerAdapter{
                 .mediaType("xml", MediaType.APPLICATION_XML)
                 .mediaType("json", MediaType.APPLICATION_JSON);
     }
+
+    @Override
+    public Validator getValidator() {
+        return this.validator;
+    }
+
+    /**
+     * 1. session 是否保存有 SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, 如果存在返回
+     * 2. SessionLocaleResolver 查询是否 defaultLocale是否有设置
+     * 3. returns the value of getLocale on the HttpServletRequest
+     * @return
+     */
+    @Bean
+    public LocaleResolver localeResolver() {
+        SessionLocaleResolver sessionLocaleResolver = new SessionLocaleResolver();
+        sessionLocaleResolver.setDefaultLocale(Locale.CHINA);
+        return sessionLocaleResolver;
+    }
+
+
 }
