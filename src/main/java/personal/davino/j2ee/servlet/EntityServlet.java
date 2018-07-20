@@ -21,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
-@WebServlet(name = "entityServlet", urlPatterns = "/entities", loadOnStartup = 1)
+//@WebServlet(name = "entityServlet", urlPatterns = "/entities", loadOnStartup = 1)
 public class EntityServlet extends HttpServlet{
 
     private final Random random;

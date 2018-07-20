@@ -5,16 +5,12 @@
              version="2.1">
     <persistence-unit name="EntityMappings" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <non-jta-data-source>
-            java:comp/env/jdbc/EntityMappings
-        </non-jta-data-source>
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <validation-mode>NONE</validation-mode>
         <properties>
             <property name="javax.persistence.schema-generation.database.action"
                       value="none"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
         </properties>
     </persistence-unit>
 </persistence>
