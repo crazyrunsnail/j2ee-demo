@@ -83,6 +83,12 @@
             <version>4.3.3.RELEASE</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.3.3.RELEASE</version>
+        </dependency>
+
         <!-- 如果不引用javaee-api 而需要分别引用以下api-->
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -104,12 +110,27 @@
             <version>2.3.1</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>javax.el</groupId>
-            <artifactId>el-api</artifactId>
-            <version>2.2</version>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>2.2.4</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.web</groupId>
+                    <artifactId>javax.el</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
         <!-- jstl 实现, 实现spring InternalResourceViewResolver 使用到-->
         <dependency>
@@ -209,6 +230,18 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
             <version>4.3.5.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>1.11.1.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

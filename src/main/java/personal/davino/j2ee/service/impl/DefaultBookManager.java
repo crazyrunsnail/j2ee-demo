@@ -27,21 +27,21 @@ public class DefaultBookManager implements BookManager{
     @Transactional
     public List<Author> getAuthors()
     {
-        return this.toList(this.authorRepository.getAll());
+        return this.toList(this.authorRepository.findAll());
     }
 
     @Override
     @Transactional
     public List<Book> getBooks()
     {
-        return this.toList(this.bookRepository.getAll());
+        return this.toList(this.bookRepository.findAll());
     }
 
     @Override
     @Transactional
     public List<Publisher> getPublishers()
     {
-        return this.toList(this.publisherRepository.getAll());
+        return this.toList(this.publisherRepository.findAll());
     }
 
     private <E> List<E> toList(Iterable<E> i)
@@ -56,9 +56,9 @@ public class DefaultBookManager implements BookManager{
     public void saveAuthor(Author author)
     {
         if(author.getId() < 1)
-            this.authorRepository.add(author);
+            this.authorRepository.save(author);
         else
-            this.authorRepository.update(author);
+            this.authorRepository.save(author);
     }
 
     @Override
@@ -66,9 +66,9 @@ public class DefaultBookManager implements BookManager{
     public void saveBook(Book book)
     {
         if(book.getId() < 1)
-            this.bookRepository.add(book);
+            this.bookRepository.save(book);
         else
-            this.bookRepository.update(book);
+            this.bookRepository.save(book);
     }
 
 
@@ -77,9 +77,9 @@ public class DefaultBookManager implements BookManager{
     public void savePublisher(Publisher publisher)
     {
         if(publisher.getId() < 1)
-            this.publisherRepository.add(publisher);
+            this.publisherRepository.save(publisher);
         else
-            this.publisherRepository.update(publisher);
+            this.publisherRepository.save(publisher);
     }
 
 }

@@ -39,4 +39,13 @@ public class Author implements Serializable{
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
+
+    @Override
+    public String toString() {
+        return "Author{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                '}';
+    }
 }

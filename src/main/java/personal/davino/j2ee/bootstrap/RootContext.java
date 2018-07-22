@@ -6,9 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.AdviceMode;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.Ordered;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -28,7 +32,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.sql.DataSource;
@@ -50,6 +53,8 @@ import java.util.concurrent.Executor;
 @Configuration
 @EnableTransactionManagement(mode = AdviceMode.PROXY, proxyTargetClass = false,
         order = Ordered.LOWEST_PRECEDENCE)
+@EnableJpaRepositories(basePackages = "personal.davino.j2ee.repository",
+        transactionManagerRef = "jpaTransactionManager", entityManagerFactoryRef = "entityManagerFactoryBean")
 public class RootContext implements AsyncConfigurer, SchedulingConfigurer, TransactionManagementConfigurer {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
@@ -146,8 +151,7 @@ public class RootContext implements AsyncConfigurer, SchedulingConfigurer, Trans
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean()
-    {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
         Map<String, Object> properties = new Hashtable<>();
         properties.put("javax.persistence.schema-generation.database.action",
                 "none");
@@ -180,6 +184,7 @@ public class RootContext implements AsyncConfigurer, SchedulingConfigurer, Trans
 
     /**
      * 对于多个 PlatformTransactionManager的时候, 优先返回这个
+     *
      * @return
      */
     @Override

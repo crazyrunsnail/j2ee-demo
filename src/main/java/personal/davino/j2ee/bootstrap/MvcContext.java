@@ -1,12 +1,24 @@
 package personal.davino.j2ee.bootstrap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.support.DomainClassConverter;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.data.web.SortHandlerMethodArgumentResolver;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -22,6 +34,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ViewResolver;
@@ -43,7 +56,13 @@ import java.util.Locale;
         useDefaultFilters = false, includeFilters = {@ComponentScan.Filter(Controller.class)})
 @EnableWebMvc
 @Configuration
+@EnableSpringDataWebSupport
 public class MvcContext extends WebMvcConfigurerAdapter{
+
+    private final Logger log = LoggerFactory.getLogger(MvcContext.class);
+
+    @Inject
+    ApplicationContext applicationContext;
 
     @Inject
     private SpringValidatorAdapter validator;
@@ -126,5 +145,35 @@ public class MvcContext extends WebMvcConfigurerAdapter{
         return sessionLocaleResolver;
     }
 
+    /**
+     * 配置 SortHandlerMethodArgumentResolver 和 PageableHandlerMethodArgumentResolver
+     * @param resolvers
+     */
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.stream().forEach(System.out::println);
+        Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.ASC, "id"));
+        Pageable defaultPageable = new PageRequest(0, 20, defaultSort);
+        SortHandlerMethodArgumentResolver sortResolver = new SortHandlerMethodArgumentResolver();
+        // sortParameter defaults to "sort" sortResolver.setSortParameter("$paging.sort"); sortResolver.setFallbackSort(defaultSort);
+        PageableHandlerMethodArgumentResolver pageableResolver =
+                new PageableHandlerMethodArgumentResolver(sortResolver);
+        pageableResolver.setMaxPageSize(200); pageableResolver.setOneIndexedParameters(true);
+        // page starts at 1, not 0 // pageProperty defaults to "page" and sizeProperty to "size"
+        // The following is equal to .setPageProperty("$paging.page") and
+        // .setSizeProperty("$paging.size"); pageableResolver.setPrefix("$paging."); pageableResolver.setFallbackPageable(defaultPageable);
+        resolvers.add(sortResolver);
+        resolvers.add(pageableResolver);
+    }
 
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        if(!(registry instanceof FormattingConversionService)) {
+            log.warn("Unable to register Spring Data JPA converter.");
+            return;
+        }
+        DomainClassConverter<FormattingConversionService> converter =
+                new DomainClassConverter<>((FormattingConversionService)registry);
+        converter.setApplicationContext(this.applicationContext);
+    }
 }

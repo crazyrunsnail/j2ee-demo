@@ -1,11 +1,13 @@
 package personal.davino.j2ee.repository;
 
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Validated
+@NoRepositoryBean
 public interface GenericRepository<I, E> {
 
     @NotNull Iterable<E> getAll();

@@ -7,6 +7,6 @@ import personal.davino.j2ee.repository.PublisherRepository;
 
 @Repository
 @Transactional
-public class PublisherRepositoryImpl extends GenericJpaRepository<Long, Publisher> implements PublisherRepository {
+public class PublisherRepositoryImpl{
 
 }
