@@ -3,13 +3,10 @@ package personal.davino.j2ee.bootstrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,14 +28,15 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Validator;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -57,9 +55,9 @@ import java.util.Locale;
 @EnableWebMvc
 @Configuration
 @EnableSpringDataWebSupport
-public class MvcContext extends WebMvcConfigurerAdapter{
+public class WebServletContextConfiguration extends WebMvcConfigurerAdapter {
 
-    private final Logger log = LoggerFactory.getLogger(MvcContext.class);
+    private final Logger log = LoggerFactory.getLogger(WebServletContextConfiguration.class);
 
     @Inject
     ApplicationContext applicationContext;
@@ -67,16 +65,25 @@ public class MvcContext extends WebMvcConfigurerAdapter{
     @Inject
     private SpringValidatorAdapter validator;
 
+    @Inject
+    Marshaller marshaller;
+    @Inject
+    Unmarshaller unmarshaller;
+
+    @Inject
+    ObjectMapper objectMapper;
+
     /**
      * 配置JSP view Resolver
      * Prefix 结尾需要 {@code /}
+     *
      * @return
      */
     @Bean
     public ViewResolver viewResolver() {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
         resolver.setViewClass(JstlView.class);
-        resolver.setPrefix("WEB-INF/view/");
+        resolver.setPrefix("/WEB-INF/view/");
         resolver.setSuffix(".jsp");
         return resolver;
     }
@@ -84,6 +91,7 @@ public class MvcContext extends WebMvcConfigurerAdapter{
     /**
      * 当 Controller 返回 void时, 由translator来处理, 根据url path来取
      * 这里的路径会加上 viewResovler 设置的 prefix 和 suffix
+     *
      * @return
      */
     @Bean
@@ -95,7 +103,7 @@ public class MvcContext extends WebMvcConfigurerAdapter{
 
 
 
-    /*@Override
+    @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(new ByteArrayHttpMessageConverter());
         converters.add(new StringHttpMessageConverter());
@@ -114,14 +122,13 @@ public class MvcContext extends WebMvcConfigurerAdapter{
         ));
         jsonConverter.setObjectMapper(this.objectMapper);
         converters.add(jsonConverter);
-    }*/
+    }
 
 
     @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer)
-    {
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.favorPathExtension(true).favorParameter(true)
-                .ignoreAcceptHeader(false) .useJaf(false)
+                .ignoreAcceptHeader(false).useJaf(false)
                 .defaultContentType(MediaType.APPLICATION_JSON)
                 .mediaType("xml", MediaType.APPLICATION_XML)
                 .mediaType("json", MediaType.APPLICATION_JSON);
@@ -136,6 +143,7 @@ public class MvcContext extends WebMvcConfigurerAdapter{
      * 1. session 是否保存有 SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, 如果存在返回
      * 2. SessionLocaleResolver 查询是否 defaultLocale是否有设置
      * 3. returns the value of getLocale on the HttpServletRequest
+     *
      * @return
      */
     @Bean
@@ -147,6 +155,7 @@ public class MvcContext extends WebMvcConfigurerAdapter{
 
     /**
      * 配置 SortHandlerMethodArgumentResolver 和 PageableHandlerMethodArgumentResolver
+     *
      * @param resolvers
      */
     @Override
@@ -158,7 +167,8 @@ public class MvcContext extends WebMvcConfigurerAdapter{
         // sortParameter defaults to "sort" sortResolver.setSortParameter("$paging.sort"); sortResolver.setFallbackSort(defaultSort);
         PageableHandlerMethodArgumentResolver pageableResolver =
                 new PageableHandlerMethodArgumentResolver(sortResolver);
-        pageableResolver.setMaxPageSize(200); pageableResolver.setOneIndexedParameters(true);
+        pageableResolver.setMaxPageSize(200);
+        pageableResolver.setOneIndexedParameters(true);
         // page starts at 1, not 0 // pageProperty defaults to "page" and sizeProperty to "size"
         // The following is equal to .setPageProperty("$paging.page") and
         // .setSizeProperty("$paging.size"); pageableResolver.setPrefix("$paging."); pageableResolver.setFallbackPageable(defaultPageable);
@@ -168,12 +178,18 @@ public class MvcContext extends WebMvcConfigurerAdapter{
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
-        if(!(registry instanceof FormattingConversionService)) {
+        if (!(registry instanceof FormattingConversionService)) {
             log.warn("Unable to register Spring Data JPA converter.");
             return;
         }
         DomainClassConverter<FormattingConversionService> converter =
-                new DomainClassConverter<>((FormattingConversionService)registry);
+                new DomainClassConverter<>((FormattingConversionService) registry);
         converter.setApplicationContext(this.applicationContext);
+    }
+
+    @Bean
+    public MultipartResolver multipartResolver()
+    {
+        return new StandardServletMultipartResolver();
     }
 }

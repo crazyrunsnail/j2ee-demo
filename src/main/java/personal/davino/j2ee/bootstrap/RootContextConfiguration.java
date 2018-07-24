@@ -1,5 +1,8 @@
 package personal.davino.j2ee.bootstrap;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -55,9 +59,9 @@ import java.util.concurrent.Executor;
         order = Ordered.LOWEST_PRECEDENCE)
 @EnableJpaRepositories(basePackages = "personal.davino.j2ee.repository",
         transactionManagerRef = "jpaTransactionManager", entityManagerFactoryRef = "entityManagerFactoryBean")
-public class RootContext implements AsyncConfigurer, SchedulingConfigurer, TransactionManagementConfigurer {
+public class RootContextConfiguration implements AsyncConfigurer, SchedulingConfigurer, TransactionManagementConfigurer {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(RootContextConfiguration.class);
 
     private final static Logger schedulingLogger = LoggerFactory.getLogger(LOGGER.getClass() + ".[scheduling]");
 
@@ -108,8 +112,8 @@ public class RootContext implements AsyncConfigurer, SchedulingConfigurer, Trans
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setBasenames("classpath:i18n/titles", "classpath:i18n/messages", "classpath:i18n/errors",
-                "classpath:i18n/validation");
+        messageSource.setBasenames("/WEB-INF/i18n/titles", "/WEB-INF/i18n/messages",
+                "/WEB-INF/i18n/errors", "/WEB-INF/i18n/validation");
         return messageSource;
     }
 
@@ -143,7 +147,7 @@ public class RootContext implements AsyncConfigurer, SchedulingConfigurer, Trans
     public DataSource dataSource() {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/EntityMappings?useUnicode=true&characterEncoding=UTF-8");
+        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/customersupport?useUnicode=true&characterEncoding=UTF-8");
         dataSource.setUsername("root");
         dataSource.setPassword("mysql");
         dataSource.setMaximumPoolSize(15);
@@ -190,5 +194,23 @@ public class RootContext implements AsyncConfigurer, SchedulingConfigurer, Trans
     @Override
     public PlatformTransactionManager annotationDrivenTransactionManager() {
         return jpaTransactionManager();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE,
+                false);
+        return mapper;
+    }
+
+
+    @Bean
+    public Jaxb2Marshaller jaxb2Marshaller() {
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setPackagesToScan(new String[] { "personal.davino.j2ee" });
+        return marshaller;
     }
 }
