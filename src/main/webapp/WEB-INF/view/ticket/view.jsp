@@ -5,7 +5,7 @@
 <template:basic htmlTitle="${ticket.subject}"
                 bodyTitle="${viewTitle} #${ticketId}: ${ticket.subject}">
     <i><spring:message code="message.ticketView.customerName" /> -
-        <c:out value="${ticket.customerName}" /><br />
+        <c:out value="${ticket.customer.username}" /><br />
     <spring:message code="message.ticketView.created" />&nbsp;
         <wrox:formatDate value="${ticket.dateCreated}" type="both"
                          timeStyle="long" dateStyle="full" /></i><br /><br />
@@ -36,7 +36,7 @@
                 </c:choose>&nbsp;
             </c:forEach><br />
             <c:forEach items="${comments.content}" var="comment">
-                <i><c:out value="${comment.customerName}" />&nbsp;</i>
+                <i><c:out value="${comment.customer.username}" />&nbsp;</i>
                 (<wrox:formatDate value="${comment.dateCreated}" type="both"
                                  timeStyle="short" dateStyle="medium" />)<br />
                 <c:out value="${comment.body}" /><br /><br />

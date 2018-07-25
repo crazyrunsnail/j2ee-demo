@@ -9,13 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -36,6 +34,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import javax.inject.Inject;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.sql.DataSource;
@@ -59,11 +58,15 @@ import java.util.concurrent.Executor;
         order = Ordered.LOWEST_PRECEDENCE)
 @EnableJpaRepositories(basePackages = "personal.davino.j2ee.repository",
         transactionManagerRef = "jpaTransactionManager", entityManagerFactoryRef = "entityManagerFactoryBean")
+@EnableLoadTimeWeaving
 public class RootContextConfiguration implements AsyncConfigurer, SchedulingConfigurer, TransactionManagementConfigurer {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RootContextConfiguration.class);
 
     private final static Logger schedulingLogger = LoggerFactory.getLogger(LOGGER.getClass() + ".[scheduling]");
+
+    @Inject
+    LoadTimeWeaver loadTimeWeaver;
 
     @Bean
     public ThreadPoolTaskScheduler taskScheduler() {
@@ -159,6 +162,7 @@ public class RootContextConfiguration implements AsyncConfigurer, SchedulingConf
         Map<String, Object> properties = new Hashtable<>();
         properties.put("javax.persistence.schema-generation.database.action",
                 "none");
+        properties.put("hibernate.ejb.use_class_enhancer", "true");
 
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setDatabasePlatform("org.hibernate.dialect.MySQL5InnoDBDialect");
@@ -167,11 +171,12 @@ public class RootContextConfiguration implements AsyncConfigurer, SchedulingConf
                 new LocalContainerEntityManagerFactoryBean();
         factory.setJpaVendorAdapter(adapter);
         factory.setDataSource(this.dataSource());
-        factory.setPackagesToScan("personal.davino.j2ee.bean.entity");
+        factory.setPackagesToScan("personal.davino.j2ee.bean.entity", "personal.davino.j2ee.converters");
         factory.setSharedCacheMode(SharedCacheMode.ENABLE_SELECTIVE);
         factory.setValidationMode(ValidationMode.NONE);
         factory.setPersistenceUnitName("EntityMappings");
         factory.setJpaPropertyMap(properties);
+        factory.setLoadTimeWeaver(this.loadTimeWeaver);
         return factory;
     }
 

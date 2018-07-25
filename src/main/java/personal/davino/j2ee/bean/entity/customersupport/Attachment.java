@@ -1,21 +1,26 @@
 package personal.davino.j2ee.bean.entity.customersupport;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 
-@XmlRootElement(name = "attachment")
 @Entity
-public class Attachment implements Serializable
-{
+@XmlRootElement(name = "attachment")
+@XmlAccessorType(XmlAccessType.NONE)
+@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE)
+public class Attachment implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private long id;
-
-    private long ticketId;
 
     @NotBlank(message = "{validate.attachment.name}")
     private String name;
@@ -29,59 +34,49 @@ public class Attachment implements Serializable
     @Id
     @Column(name = "AttachmentId")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public long getId()
-    {
+    @XmlElement
+    @JsonProperty
+    public long getId() {
         return this.id;
     }
 
-    public void setId(long id)
-    {
+    public void setId(long id) {
         this.id = id;
     }
 
     @Basic
-    public long getTicketId()
-    {
-        return this.ticketId;
-    }
-
-    public void setTicketId(long ticketId)
-    {
-        this.ticketId = ticketId;
-    }
-
-    @Basic
     @Column(name = "AttachmentName")
-    public String getName()
-    {
+    @XmlElement
+    @JsonProperty
+    public String getName() {
         return this.name;
     }
 
-    public void setName(String name)
-    {
+    public void setName(String name) {
         this.name = name;
     }
 
     @Basic
-    public String getMimeContentType()
-    {
+    @XmlElement
+    @JsonProperty
+    public String getMimeContentType() {
         return this.mimeContentType;
     }
 
-    public void setMimeContentType(String mimeContentType)
-    {
+    public void setMimeContentType(String mimeContentType) {
         this.mimeContentType = mimeContentType;
     }
 
-    @XmlSchemaType(name = "base64Binary")
     @Lob
-    public byte[] getContents()
-    {
+    @Basic(fetch = FetchType.LAZY)
+    @XmlElement
+    @XmlSchemaType(name = "base64Binary")
+    @JsonProperty
+    public byte[] getContents() {
         return this.contents;
     }
 
-    public void setContents(byte[] contents)
-    {
+    public void setContents(byte[] contents) {
         this.contents = contents;
     }
 }

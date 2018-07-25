@@ -12,9 +12,10 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 import personal.davino.j2ee.bean.entity.customersupport.Attachment;
+import personal.davino.j2ee.bean.entity.customersupport.Ticket;
+import personal.davino.j2ee.bean.entity.customersupport.TicketComment;
 import personal.davino.j2ee.bootstrap.annotation.WebController;
-import personal.davino.j2ee.service.customersupport.Ticket;
-import personal.davino.j2ee.service.customersupport.TicketComment;
+import personal.davino.j2ee.repository.customsupport.UserRepository;
 import personal.davino.j2ee.service.customersupport.TicketService;
 import personal.davino.j2ee.view.DownloadingView;
 
@@ -36,6 +37,9 @@ public class TicketController
 
     @Inject
     TicketService ticketService;
+
+    @Inject
+    UserRepository userRepository;
 
     @RequestMapping(value = {"", "list"}, method = RequestMethod.GET)
     public String list(Map<String, Object> model)
@@ -61,20 +65,15 @@ public class TicketController
     }
 
     @RequestMapping(
-            value = "/{ticketId}/attachment/{attachment:.+}",
+            value = "attachment/{attachmentId}",
             method = RequestMethod.GET
     )
-    public View download(@PathVariable("ticketId") long ticketId,
-                         @PathVariable("attachment") String name)
+    public View download(@PathVariable("attachmentId") long attachmentId)
     {
-        Ticket ticket = this.ticketService.getTicket(ticketId);
-        if(ticket == null)
-            return this.getListRedirectView();
-
-        Attachment attachment = ticket.getAttachment(name);
+        Attachment attachment = this.ticketService.getAttachment(attachmentId);
         if(attachment == null)
         {
-            log.info("Requested attachment {} not found on ticket {}.", name, ticket);
+            log.info("Requested attachment {} not found.", attachmentId);
             return this.getListRedirectView();
         }
 
@@ -98,7 +97,7 @@ public class TicketController
             return new ModelAndView("ticket/add");
 
         Ticket ticket = new Ticket();
-        ticket.setCustomerName("Nicholas");
+        ticket.setCustomer(userRepository.getByUsername(principal.getName()));
         ticket.setSubject(form.getSubject());
         ticket.setBody(form.getBody());
 
@@ -143,7 +142,7 @@ public class TicketController
             return this.view(model, page, ticketId);
 
         TicketComment comment = new TicketComment();
-        comment.setCustomerName(principal.getName());
+        comment.setCustomer(this.userRepository.getByUsername(principal.getName()));
         comment.setBody(form.getBody());
 
         try

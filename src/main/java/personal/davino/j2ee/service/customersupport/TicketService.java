@@ -3,6 +3,9 @@ package personal.davino.j2ee.service.customersupport;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
+import personal.davino.j2ee.bean.entity.customersupport.Attachment;
+import personal.davino.j2ee.bean.entity.customersupport.Ticket;
+import personal.davino.j2ee.bean.entity.customersupport.TicketComment;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -36,4 +39,6 @@ public interface TicketService
                     long ticketId
     );
     void deleteComment(long id);
+
+    Attachment getAttachment(long id);
 }
