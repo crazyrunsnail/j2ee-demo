@@ -28,6 +28,7 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartResolver;
@@ -191,5 +192,10 @@ public class WebServletContextConfiguration extends WebMvcConfigurerAdapter {
     public MultipartResolver multipartResolver()
     {
         return new StandardServletMultipartResolver();
+    }
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
     }
 }
